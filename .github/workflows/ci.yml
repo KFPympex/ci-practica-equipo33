@@ -18,4 +18,4 @@ jobs:
         run: pip install pytest
 
       - name: Ejecutar pruebas
-        run: pytestD
+        run: pytest
