@@ -1,37 +1,57 @@
-name: CI Pipeline
+
+name: Pruebas y métricas CI
 
 on:
   push:
+    branches: [main, master]
+  workflow_dispatch:
 
 jobs:
-  build:
+  pruebas:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Instalar dependencias
         run: |
-          pip install pytest
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
 
-      - name: Ejecutar pruebas
+      - name: Ejecutar pruebas y cobertura
         run: |
-          pytest
+          python -m pytest -v \
+            --junitxml=test-results.xml \
+            --cov=calculadora \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html
 
       - name: Build proyecto
         run: |
-          mkdir artefactos
+          mkdir -p artefactos
           cp calculadora.py artefactos/
-
-      - name: Generar ZIP
-        run: |
-          zip -r artefacto.zip artefactos
+          zip -r artefacto.zip artefactos/
 
       - name: Subir artefacto
         uses: actions/upload-artifact@v4
         with:
           name: build-python
           path: artefacto.zip
+
+      - name: Guardar reportes de pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-pruebas
+          path: |
+            coverage.xml
+            test-results.xml
+            htmlcov/
+          if-no-files-found: warn
