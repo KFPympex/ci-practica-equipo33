@@ -33,19 +33,7 @@ jobs:
             --cov-report=xml:coverage.xml \
             --cov-report=html
 
-      - name: Build proyecto
-        run: |
-          mkdir -p artefactos
-          cp calculadora.py artefactos/
-          zip -r artefacto.zip artefactos/
-
-      - name: Subir artefacto
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-python
-          path: artefacto.zip
-
-      - name: Guardar reportes de pruebas
+      - name: Guardar artefactos
         if: always()
         uses: actions/upload-artifact@v4
         with:
